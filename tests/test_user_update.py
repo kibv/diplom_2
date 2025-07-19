@@ -7,12 +7,14 @@ import random
 @allure.feature("User Update")
 class TestUserUpdate:
 
-    @allure.story("Изменение данных с авторизацией")
+    @allure.title("Изменение данных с авторизацией")
     @pytest.mark.parametrize("field,value", [
         ("name", "NewName"),
         ("email", f"updated_{random.randint(10000,99999)}@example.com")
     ])
     def test_update_user_authorized(self, user_token, field, value):
+        token = user_token["token"]
+        assert token is not None, "No access token received after login"
         headers = {"Authorization": user_token["token"]}
         res = requests.patch(USER_URL, json={field: value}, headers=headers)
         assert res.status_code == 200
@@ -20,7 +22,7 @@ class TestUserUpdate:
         assert body["success"] is True
         assert body["user"][field] == value
 
-    @allure.story("Изменение данных без авторизации")
+    @allure.title("Изменение данных без авторизации")
     def test_update_user_unauthorized(self):
         res = requests.patch(USER_URL, json={"name": "NoAuth"})
         assert res.status_code == 401
